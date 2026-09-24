@@ -32,7 +32,7 @@
     "js-base64": "^3.9.4",
     "json-schema-faker": "^0.5.9",
     "json5": "^2.2.3",
-    "jsondiffpatch": "^0.4.1",
+    "jsondiffpatch": "^0.7.6",
     "jsonwebtoken": "^9.0.3",
     "jsrsasign": "^11.1.5",
     "koa": "^3.2.1",

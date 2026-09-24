@@ -5,7 +5,7 @@
 var strRegex = /\${([a-zA-Z]+)\.?([a-zA-Z0-9_\.]*)\}/i;
 var varSplit = '.';
 var mockSplit = '|';
-var Mock = require('mockjs');
+var Mock = require('./mockjs.js');
 Mock.Random.extend({
   timestamp: function(){
     var time = new Date().getTime() + '';

@@ -1,6 +1,6 @@
 const moment = require('moment');
 const constants = require('./constants/variable');
-const Mock = require('mockjs');
+const Mock = require('../common/mockjs.js');
 const json5 = require('json5');
 const MockExtra = require('common/mock-extra.js');
 

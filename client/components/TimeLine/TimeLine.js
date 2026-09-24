@@ -9,10 +9,9 @@ import { Link } from 'react-router-dom';
 import { fetchNewsData, fetchMoreNews } from '../../reducer/modules/news.js';
 import { fetchInterfaceList } from '../../reducer/modules/interface.js';
 import ErrMsg from '../ErrMsg/ErrMsg.js';
-const jsondiffpatch = require('jsondiffpatch/dist/jsondiffpatch.umd.js');
-const formattersHtml = jsondiffpatch.formatters.html;
-import 'jsondiffpatch/dist/formatters-styles/annotated.css';
-import 'jsondiffpatch/dist/formatters-styles/html.css';
+const { jsondiffpatch, formattersHtml } = require('../../../common/json-diff.js');
+import 'jsondiffpatch/formatters/styles/annotated.css';
+import 'jsondiffpatch/formatters/styles/html.css';
 import './TimeLine.scss';
 import { timeago } from '../../../common/utils.js';
 

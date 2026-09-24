@@ -1,4 +1,4 @@
-const Mock = require('mockjs');
+const Mock = require('./mockjs.js');
 const filter = require('./power-string.js').filter;
 const stringUtils = require('./power-string.js').utils;
 const json5 = require('json5');

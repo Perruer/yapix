@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const _ = require('underscore');
 const path = require('path');
 const lib = require(path.resolve(yapi.WEBROOT, 'common/lib.js'));
-const Mock = require('mockjs');
+const Mock = require('../../common/mockjs.js');
 const mockExtra = require(path.resolve(yapi.WEBROOT, 'common/mock-extra.js'));
 
 function arrToObj(arr) {

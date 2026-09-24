@@ -9,8 +9,7 @@ const baseController = require('./base.js');
 const yapi = require('../yapi.js');
 const userModel = require('../models/user.js');
 const projectModel = require('../models/project.js');
-const jsondiffpatch = require('jsondiffpatch');
-const formattersHtml = jsondiffpatch.formatters.html;
+const { jsondiffpatch, formattersHtml } = require('../../common/json-diff.js');
 const showDiffMsg = require('../../common/diff-view.js');
 const mergeJsonSchema = require('../../common/mergeJsonSchema');
 const fs = require('fs-extra');
@@ -789,12 +788,12 @@ class interfaceController extends baseController {
       let annotatedCss = fs.readFileSync(
         path.resolve(
           yapi.WEBROOT,
-          'node_modules/jsondiffpatch/dist/formatters-styles/annotated.css'
+          'node_modules/jsondiffpatch/lib/formatters/styles/annotated.css'
         ),
         'utf8'
       );
       let htmlCss = fs.readFileSync(
-        path.resolve(yapi.WEBROOT, 'node_modules/jsondiffpatch/dist/formatters-styles/html.css'),
+        path.resolve(yapi.WEBROOT, 'node_modules/jsondiffpatch/lib/formatters/styles/html.css'),
         'utf8'
       );
 

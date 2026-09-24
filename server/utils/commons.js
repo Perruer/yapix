@@ -13,7 +13,7 @@ const followModel = require('../models/follow.js');
 const json5 = require('json5');
 const _ = require('underscore');
 const Ajv = require('ajv-draft-04');
-const Mock = require('mockjs');
+const Mock = require('../../common/mockjs.js');
 const { runScript } = require('./sandbox');
 
 
