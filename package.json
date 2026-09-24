@@ -8,7 +8,7 @@
     "install-server": "node server/install.js",
     "dev-server": "node --watch server/app.js dev",
     "test": "node --require ./test/setup.js --test \"test/**/*.test.js\"",
-    "build-client": "webpack --mode production",
+    "build-client": "webpack --mode production && node scripts/pack-extension.js",
     "dev-client": "webpack --mode development --watch"
   },
   "repository": {
@@ -77,6 +77,7 @@
     "less-loader": "^12.3.3",
     "mini-css-extract-plugin": "^2.10.2",
     "moment": "^2.19.3",
+    "playwright-core": "^1.63.0",
     "process": "^0.11.10",
     "prop-types": "^15.5.10",
     "rc-queue-anim": "^1.2.0",

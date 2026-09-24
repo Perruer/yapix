@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Yapix Request Helper</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <img src="icons/32.png" alt="" width="20" height="20">
+    <h1>Yapix Request Helper</h1>
+  </header>
+
+  <section id="current">
+    <p class="label">This site</p>
+    <p id="origin" class="origin"></p>
+    <p id="state" class="hint"></p>
+    <button id="toggle" type="button"></button>
+  </section>
+
+  <section>
+    <p class="label">Allowed sites</p>
+    <ul id="list"></ul>
+    <p id="empty" class="hint">None yet. Open your Yapix site and allow it here.</p>
+  </section>
+
+  <footer>
+    Allow only Yapix sites you trust: an allowed site can send requests with your cookies to any address.
+  </footer>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

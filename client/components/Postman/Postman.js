@@ -650,7 +650,7 @@ export default class Run extends Component {
               if (hasPlugin) {
                 return '发送请求';
               } else {
-                return '请安装 cross-request 插件';
+                return '请安装 Yapix Request Helper 扩展，并在扩展中允许本站点';
               }
             })()}
           >
@@ -934,7 +934,7 @@ export default class Run extends Component {
                 {this.state.resStatusCode + '  ' + this.state.resStatusText}
               </h2>
               <div>
-                <a rel="noopener noreferrer"  target="_blank" href="https://juejin.im/post/5c888a3e5188257dee0322af">如何查看 http 请求数据</a>
+                <a rel="noopener noreferrer"  target="_blank" href="https://developer.chrome.com/docs/devtools/network">如何查看 http 请求数据</a>
               </div>
               {this.state.test_valid_msg && (
                 <Alert

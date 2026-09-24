@@ -543,14 +543,18 @@ class interfaceController extends baseController {
     }
   }
 
+  // The Yapix Request Helper browser extension, packed by scripts/pack-extension.js.
   async downloadCrx(ctx) {
-    let filename = 'crossRequest.zip';
-    let dataBuffer = yapi.fs.readFileSync(
-      yapi.path.join(yapi.WEBROOT, 'static/attachment/cross-request.zip')
-    );
+    let filename = 'yapix-request-helper.zip';
+    let file = yapi.path.join(yapi.WEBROOT, 'static/attachment', filename);
+    if (!yapi.commons.fileExist(file)) {
+      ctx.status = 404;
+      ctx.body = yapi.commons.resReturn(null, 404, 'yapix-request-helper.zip is missing: run npm run build-client');
+      return;
+    }
     ctx.set('Content-disposition', 'attachment; filename=' + filename);
     ctx.set('Content-Type', 'application/zip');
-    ctx.body = dataBuffer;
+    ctx.body = yapi.fs.readFileSync(file);
   }
 
   async listByCat(ctx) {

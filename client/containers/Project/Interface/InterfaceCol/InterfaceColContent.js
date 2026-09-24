@@ -1063,7 +1063,7 @@ class InterfaceColContent extends Component {
                 </Button>
               </div>
             ) : (
-              <Tooltip title="请安装 cross-request Chrome 插件">
+              <Tooltip title="请安装 Yapix Request Helper 扩展，并在扩展中允许本站点">
                 <Button
                   disabled
                   type="primary"

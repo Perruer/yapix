@@ -48,3 +48,4 @@ client/plugin-module.js
 # built by webpack
 /static/prd/
 /static/index.html
+/static/attachment/yapix-request-helper.zip

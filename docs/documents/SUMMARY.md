@@ -20,6 +20,7 @@
 * [接口操作](api.md)
   * [接口设置](api.md#接口配置)
   * [接口运行](api.md#接口运行)
+  * [浏览器扩展 Yapix Request Helper](extension.md)
 * [数据Mock](mock.md)
   * [方式1. mockjs](mock.md#方式1. mockjs)
   * [方式2. json-schema](mock.md#方式2. json-schema)

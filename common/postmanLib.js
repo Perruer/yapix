@@ -362,7 +362,7 @@ async function crossRequest(defaultOptions, preScript, afterScript, commonContex
           res = json_parse(data.res.body);
           data.res.body = res;
         }
-        if (!isNode) message = '请求异常，请检查 chrome network 错误信息... https://juejin.im/post/5c888a3e5188257dee0322af 通过该链接查看教程"）';
+        if (!isNode) message = '请求异常，请检查浏览器开发者工具 Network 面板中的错误信息';
         if (isNaN(data.res.status)) {
           reject({
             body: res || message,

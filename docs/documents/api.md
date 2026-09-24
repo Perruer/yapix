@@ -45,11 +45,11 @@
 ## 接口运行
 接口运行功能，是用来测试真实接口的，类似『Postman』的功能。
 
-点击运行 tab ,可进入到接口测试页面，首先安装『chrome crossRequest』扩展，才可正常使用此功能。
+点击运行 tab ,可进入到接口测试页面，首先安装 [Yapix Request Helper](extension.md) 浏览器扩展并在扩展中允许当前站点，才可正常使用此功能。
 
 点击保存按钮可把当前接口保存到测试集，方便下次调试。
 
-> 安装完插件记得刷新页面
+> 在扩展中允许站点后页面会自动刷新
 
 <img src="./images/interface_run.png" height="50%"/>
 
