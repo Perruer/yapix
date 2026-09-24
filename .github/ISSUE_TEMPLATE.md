@@ -1,13 +1,16 @@
-## 版本号
-~ 
+<!-- Security problems: please report them privately (Security → Report a vulnerability), not here. -->
+<!-- 安全问题请通过 Security → Report a vulnerability 私下报告，不要公开提交。 -->
 
-## 什么问题
-~
+## Version / 版本
 
-## 如何复现此问题
-~ 
+- Yapix:
+- Installed with / 安装方式 (Docker, source / 源码):
+- Node.js:
+- MongoDB:
+- Upgraded from YApi? / 是否从 YApi 升级:
 
-## 什么浏览器
-~ 
+## What happened / 问题描述
 
-## 什么系统（Linux, Windows, macOS）
+## How to reproduce / 复现步骤
+
+## Browser and OS / 浏览器与系统

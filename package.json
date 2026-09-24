@@ -1,6 +1,6 @@
 {
   "name": "yapix",
-  "version": "2.0.0-dev",
+  "version": "2.0.0",
   "description": "Yapix: API management, mock server and API testing platform. Maintained continuation of YApi.",
   "main": "server/app.js",
   "scripts": {
