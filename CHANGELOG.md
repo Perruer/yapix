@@ -1,4 +1,4 @@
-## Yapix 2.0.0 (unreleased)
+## Yapix 2.0.0 (2026-09-25)
 
 The first release of Yapix, a maintained continuation of YApi 1.12. It runs on existing YApi databases; read [UPGRADING.md](UPGRADING.md) before upgrading.
 
