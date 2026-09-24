@@ -1,4 +1,4 @@
-const koaRouter = require('koa-router');
+const Router = require('@koa/router');
 const interfaceController = require('./controllers/interface.js');
 const groupController = require('./controllers/group.js');
 const userController = require('./controllers/user.js');
@@ -12,7 +12,7 @@ const followController = require('./controllers/follow.js');
 const openController = require('./controllers/open.js');
 const { createAction } = require('./utils/commons.js');
 
-const router = koaRouter();
+const router = new Router();
 
 let INTERFACE_CONFIG = {
   interface: {

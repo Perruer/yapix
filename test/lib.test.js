@@ -1,4 +1,4 @@
-import test from 'ava';
+const test = require('./ava-compat');
 
 const rewire = require("rewire");
 const lib = rewire('../common/lib.js');

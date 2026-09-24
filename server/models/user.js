@@ -82,13 +82,13 @@ class userModel extends baseModel {
   }
 
   del(id) {
-    return this.model.remove({
+    return this.model.deleteMany({
       _id: id
     });
   }
 
   update(id, data) {
-    return this.model.update(
+    return this.model.updateOne(
       {
         _id: id
       },

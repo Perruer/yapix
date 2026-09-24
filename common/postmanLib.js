@@ -30,7 +30,8 @@ const getStorage = async (id)=>{
         setItem: (name, value)=>{
           data[name] = value;
           storage.setItem(name, value)
-        }
+        },
+        getAll: () => Object.assign({}, data)
       }
     }else{
       return {
@@ -175,32 +176,50 @@ function handleCurrDomain(domains, case_env) {
   return currDomain;
 }
 
-function sandboxByNode(sandbox = {}, script) {
-  const vm = require('vm');
-  script = new vm.Script(script);
-  const context = new vm.createContext(sandbox);
-  script.runInContext(context, {
-    timeout: 10000
+// Keys a pre- or post-request script may read and change.
+const SCRIPT_KEYS = [
+  'isNode', 'href', 'hostname', 'caseId', 'method', 'pathname', 'query', 'requestHeader', 'requestBody',
+  'responseData', 'responseHeader', 'responseStatus', 'runTime', 'projectId', 'interfaceId', 'uid'
+];
+const READ_ONLY_KEYS = ['href', 'hostname', 'caseId'];
+
+// On the server, scripts run in a separate isolate (server/utils/sandbox.js) and see a copy of the
+// request data; the changed values are copied back. In the browser they run in the page, as before.
+async function sandboxByNode(context, script) {
+  const { runScript } = require('../server/utils/sandbox');
+  const data = {};
+  for (const key of SCRIPT_KEYS) {
+    if (context[key] !== undefined) data[key] = context[key];
+  }
+  const storageItems = context.storage && context.storage.getAll ? context.storage.getAll() : {};
+  const result = await runScript(`const context = globalThis;
+${script}`, {
+    data,
+    outputKeys: SCRIPT_KEYS,
+    utils: true,
+    storage: storageItems
   });
-  return sandbox;
+  for (const key of Object.keys(result.data)) {
+    if (READ_ONLY_KEYS.indexOf(key) === -1) context[key] = result.data[key];
+  }
+  for (const name of Object.keys(result.storage || {})) {
+    context.storage.setItem(name, result.storage[name]);
+  }
+  return context;
 }
 
 async function sandbox(context = {}, script) {
   if (isNode) {
     try {
-      context.context = context;
-      context.console = console;
-      context.Promise = Promise;
-      context.setTimeout = setTimeout;
-      context = sandboxByNode(context, script);
+      context = await sandboxByNode(context, script);
     } catch (err) {
       err.message = `Script: ${script}
       message: ${err.message}`;
       throw err;
     }
-  } else {
-    context = sandboxByBrowser(context, script);
+    return context;
   }
+  context = sandboxByBrowser(context, script);
   if (context.promise && typeof context.promise === 'object' && context.promise.then) {
     try {
       await context.promise;

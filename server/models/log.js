@@ -49,7 +49,7 @@ class logModel extends baseModel {
   }
 
   del(id) {
-    return this.model.remove({
+    return this.model.deleteMany({
       _id: id
     });
   }

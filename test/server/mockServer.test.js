@@ -1,4 +1,4 @@
-import test from 'ava';
+const test = require('../ava-compat');
 const rewire = require("rewire");
 const mockServer = rewire('../../server/middleware/mockServer.js');
 const matchApi = mockServer.__get__('matchApi');

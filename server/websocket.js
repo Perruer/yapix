@@ -1,8 +1,8 @@
-const koaRouter = require('koa-router');
+const Router = require('@koa/router');
 const interfaceController = require('./controllers/interface.js');
 const yapi = require('./yapi.js');
 
-const router = koaRouter();
+const router = new Router();
 const { createAction } = require("./utils/commons.js")
 
 let pluginsRouterPath = [];

@@ -40,6 +40,29 @@ export async function more(ctx, { check, ok, Client }) {
   r = await user.get(`/api/plugin/advmock/case/list?interface_id=${getId}`);
   check('list mock expectations', ok(r) && r.data.length === 1, r);
 
+  // --- mock script (runs in the script isolate on the server)
+  r = await user.post('/api/plugin/advmock/save', {
+    project_id: projectId,
+    interface_id: getId,
+    enable: true,
+    mock_script: 'mockJson.fromScript = params.role || "none"; mockJson.random = Random.integer(1, 9); httpCode = 202;'
+  });
+  check('save a mock script', ok(r), r);
+  r = await anon().request('GET', `/mock/${projectId}${basepath}/users/7?role=dev`, undefined, { raw: true });
+  {
+    let body = {};
+    try {
+      body = JSON.parse(r.text);
+    } catch {
+      /* checked below */
+    }
+    check(
+      'the mock script changes the response',
+      r.status === 202 && body.fromScript === 'dev' && body.random >= 1 && body.random <= 9,
+      { status: r.status, text: r.text.slice(0, 200) }
+    );
+  }
+
   // --- test collections
   r = await user.post('/api/col/add_col', { project_id: projectId, name: 'smoke', desc: 'e2e' });
   check('add a test collection', ok(r), r);
@@ -65,10 +88,26 @@ export async function more(ctx, { check, ok, Client }) {
   r = await user.get(`/api/col/case?caseid=${caseId}`);
   check('get a test case', ok(r) && r.data.casename === 'login (updated)', r);
 
+  // --- test-case assertion scripts
+  const scriptRun = script =>
+    user.post('/api/col/run_script', {
+      col_id: colId,
+      interface_id: postId,
+      script,
+      response: { status: 200, body: { code: 0, name: 'alice' }, header: {} },
+      records: {},
+      params: {}
+    });
+  r = await scriptRun('assert.equal(status, 200); assert.deepEqual(body, { code: 0, name: "alice" }); log(body.name);');
+  check('a passing assertion script', ok(r) && r.data.logs.some(l => l.includes('alice')), r);
+  r = await scriptRun('assert.equal(body.name, "bob");');
+  check('a failing assertion script reports the failure', r.errcode === 400 && /AssertionError/.test(r.errmsg), r);
+
   // --- open API (project token)
   if (token) {
-    r = await anon().get(`/api/open/project_interface_data?token=${token}&project_id=${projectId}`);
-    check('open API lists interfaces with the project token', ok(r) && Array.isArray(r.data), r);
+    // /api/open/project_interface_data is an empty stub in YApi; any API accepts the project token.
+    r = await anon().get(`/api/interface/list_menu?token=${token}&project_id=${projectId}`);
+    check('the project token authorizes API calls', ok(r) && Array.isArray(r.data), r);
     r = await anon().post('/api/open/import_data', {
       type: 'swagger',
       json: JSON.stringify(swagger),

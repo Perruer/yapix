@@ -1,8 +1,8 @@
-import test from 'ava';
-import {
+const test = require('../ava-compat');
+const {
   handleParamsValue,
   schemaValidator
-} from '../../common/utils.js';
+} = require('../../common/utils.js');
 
 
 test('handleParamsValue', t => {

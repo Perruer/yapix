@@ -1,14 +1,19 @@
 const path = require('path');
 const fs = require('fs-extra');
 const nodemailer = require('nodemailer');
-const config = require('../../config.json');
+// config.json sits next to the app folder (YApi's layout: <runtime>/vendors + <runtime>/config.json)
+// unless YAPIX_CONFIG points somewhere else. Logs and init.lock go to the folder that holds it.
+const CONFIG_PATH = process.env.YAPIX_CONFIG
+  ? path.resolve(process.env.YAPIX_CONFIG)
+  : path.resolve(__dirname, '../../config.json');
+const config = require(CONFIG_PATH);
 
 let insts = new Map();
 let mail;
 
 const WEBROOT = path.resolve(__dirname, '..'); //路径
 const WEBROOT_SERVER = __dirname;
-const WEBROOT_RUNTIME = path.resolve(__dirname, '../..');
+const WEBROOT_RUNTIME = path.dirname(CONFIG_PATH);
 const WEBROOT_LOG = path.join(WEBROOT_RUNTIME, 'log');
 const WEBCONFIG = config;
 

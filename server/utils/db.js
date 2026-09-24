@@ -13,50 +13,36 @@ function model(model, schema) {
 }
 
 function connect(callback) {
-  mongoose.Promise = global.Promise;
-  mongoose.set('useNewUrlParser', true);
-  mongoose.set('useFindAndModify', false);
-  mongoose.set('useCreateIndex', true);
+  // Mongoose 5 left unknown fields in query filters alone; keep that behaviour.
+  mongoose.set('strictQuery', false);
 
   let config = yapi.WEBCONFIG;
-  let options = {useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true};
+  let options = {};
 
   if (config.db.user) {
     options.user = config.db.user;
     options.pass = config.db.pass;
   }
 
-  if (config.db.reconnectTries) {
-    options.reconnectTries = config.db.reconnectTries;
-  }
-
-  if (config.db.reconnectInterval) {
-    options.reconnectInterval = config.db.reconnectInterval;
-  }
-
-
-  options = Object.assign({}, options, config.db.options)
+  // reconnectTries and reconnectInterval belonged to the old driver; the current one retries on its own.
+  options = Object.assign({}, options, config.db.options);
+  delete options.useNewUrlParser;
+  delete options.useCreateIndex;
+  delete options.useUnifiedTopology;
+  delete options.useFindAndModify;
 
   var connectString = '';
 
-  if(config.db.connectString){
+  if (config.db.connectString) {
     connectString = config.db.connectString;
-  }else{
+  } else {
     connectString = `mongodb://${config.db.servername}:${config.db.port}/${config.db.DATABASE}`;
     if (config.db.authSource) {
       connectString = connectString + `?authSource=${config.db.authSource}`;
     }
   }
 
-  let db = mongoose.connect(
-    connectString,
-    options,
-    function(err) {
-      if (err) {
-        yapi.commons.log(err + ', mongodb Authentication failed', 'error');
-      }
-    }
-  );
+  let db = mongoose.connect(connectString, options);
 
   db.then(
     function() {
@@ -67,7 +53,7 @@ function connect(callback) {
       }
     },
     function(err) {
-      yapi.commons.log(err + 'mongodb connect error', 'error');
+      yapi.commons.log(err + ' mongodb connect error', 'error');
     }
   );
 

@@ -1,6 +1,6 @@
 const _ = require('underscore')
 const swagger = require('swagger-client');
-const compareVersions = require('compare-versions');
+const { compareVersions } = require('compare-versions');
 
   var SwaggerData, isOAS3;
   function handlePath(path) {

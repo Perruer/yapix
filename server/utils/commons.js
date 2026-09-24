@@ -11,9 +11,9 @@ const userModel = require('../models/user.js');
 const followModel = require('../models/follow.js');
 const json5 = require('json5');
 const _ = require('underscore');
-const Ajv = require('ajv');
+const Ajv = require('ajv-draft-04');
 const Mock = require('mockjs');
-const sandboxFn = require('./sandbox')
+const { runScript } = require('./sandbox');
 
 
 
@@ -52,7 +52,7 @@ exports.schemaToJson = function (schema, options = {}) {
   jsf.option(options);
   let result;
   try {
-    result = jsf(schema);
+    result = jsf.generate(schema);
   } catch (err) {
     result = err.message;
   }
@@ -281,19 +281,9 @@ exports.verifyPath = path => {
  * @example let a = sandbox({a: 1}, 'a=2')
  * a = {a: 2}
  */
-exports.sandbox = (sandbox, script) => {
-  try {
-    const vm = require('vm');
-    sandbox = sandbox || {};	
-    script = new vm.Script(script);	
-    const context = new vm.createContext(sandbox);	
-    script.runInContext(context, {	
-      timeout: 3000	
-    });	      
-    return sandbox
-  } catch (err) {
-    throw err
-  }
+exports.sandbox = async (sandbox, script) => {
+  const result = await runScript(script, { data: sandbox || {} });
+  return Object.assign(sandbox || {}, result.data);
 };
 
 function trim(str) {
@@ -363,6 +353,9 @@ exports.handleParams = (params, keys) => {
 exports.validateParams = (schema2, params) => {
   const flag = schema2.closeRemoveAdditional;
   const ajv = new Ajv({
+    strict: false,
+    // the generated schemas use required: [], which draft-04 does not allow
+    validateSchema: false,
     allErrors: true,
     coerceTypes: true,
     useDefaults: true,
@@ -531,14 +524,21 @@ exports.runCaseScript = async function runCaseScript(params, colId, interfaceId)
   let colData = await colInst.get(colId);
   const logs = [];
   const context = {
-    assert: require('assert'),
     status: params.response.status,
     body: params.response.body,
     header: params.response.header,
     records: params.records,
-    params: params.params,
-    log: msg => {
-      logs.push('log: ' + convertString(msg));
+    params: params.params
+  };
+  // Scripts get assert and log inside the isolate; log lines come back in the result.
+  const runAssertions = async code => {
+    try {
+      const out = await runScript(code, { data: context });
+      logs.push(...out.logs);
+      return Object.assign(context, out.data);
+    } catch (err) {
+      if (err && Array.isArray(err.logs)) logs.push(...err.logs);
+      throw err;
     }
   };
 
@@ -577,7 +577,7 @@ ${JSON.stringify(schema, null, 2)}`)
       // script 是断言
       if (globalScript) {
         logs.push('执行脚本：' + globalScript)
-        result = await sandboxFn(context, globalScript);
+        result = await runAssertions(globalScript);
       }
     }
 
@@ -586,7 +586,7 @@ ${JSON.stringify(schema, null, 2)}`)
     // script 是断言
     if (script) {
       logs.push('执行脚本:' + script)
-      result = await sandboxFn(context, script);
+      result = await runAssertions(script);
     }
     result.logs = logs;
     return yapi.commons.resReturn(result);
@@ -622,8 +622,7 @@ exports.handleMockScript = async function (script, context) {
     params: Object.assign({}, context.ctx.query, context.ctx.request.body),
     resHeader: context.resHeader,
     httpCode: context.httpCode,
-    delay: context.httpCode,
-    Random: Mock.Random
+    delay: context.delay
   };
   sandbox.cookie = {};
 
@@ -632,7 +631,7 @@ exports.handleMockScript = async function (script, context) {
       var parts = Cookie.split('=');
       sandbox.cookie[parts[0].trim()] = (parts[1] || '').trim();
     });
-  sandbox = await sandboxFn(sandbox, script);
+  sandbox = (await runScript(script, { data: sandbox })).data;
   sandbox.delay = isNaN(sandbox.delay) ? 0 : +sandbox.delay;
 
   context.mockJson = sandbox.mockJson;

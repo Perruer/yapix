@@ -42,7 +42,7 @@ function run() {
       let arr = [];
       for (let i = 0; i < 11; i++) {
         if (arr.length >= 5) {
-          logCol.insert(arr);
+          logCol.insertMany(arr);
           arr = [];
         }
         arr.push(data(i));

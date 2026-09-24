@@ -113,9 +113,10 @@ class interfaceColController extends baseController {
    */
   async testFilesUpload(ctx) {
     try {
-      let file = ctx.request.body.files.file;
+      let file = ctx.request.files.file;
+      if (Array.isArray(file)) file = file[0];
       let newPath = path.join(yapi.WEBROOT_RUNTIME, 'test.text');
-      fs.renameSync(file.path, newPath);
+      fs.renameSync(file.filepath, newPath);
       ctx.body = yapi.commons.resReturn({ res: '上传成功' });
     } catch (e) {
       ctx.body = yapi.commons.resReturn(null, 402, e.message);

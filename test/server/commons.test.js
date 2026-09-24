@@ -1,5 +1,5 @@
-import test from 'ava';
-import {
+const test = require('../ava-compat');
+const {
   ltrim,
   rtrim,
   trim,
@@ -7,7 +7,7 @@ import {
   verifyPath, 
   sandbox,
   handleVarPath
-} from '../../server/utils/commons.js';
+} = require('../../server/utils/commons.js');
 
 test('trim', t => {
     t.is(trim(" a   b  ksjdfk    "), 'a   b  ksjdfk');
@@ -43,8 +43,8 @@ test('verifyPath', t=>{
     t.true(verifyPath('/a:b/t/.api/k_-/tt/'))
 })
 
-test('sandbox', t=>{
-    t.deepEqual(sandbox({
+test('sandbox', async t=>{
+    t.deepEqual(await sandbox({
         a: 1
     }, 'a=2'), {a : 2});
 })

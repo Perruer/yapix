@@ -15,8 +15,7 @@ require('./utils/notice')
 
 const Koa = require('koa');
 const koaStatic = require('koa-static');
-// const bodyParser = require('koa-bodyparser');
-const koaBody = require('koa-body');
+const { koaBody } = require('koa-body');
 const router = require('./router.js');
 
 global.storageCreator = storageCreator;
@@ -26,8 +25,16 @@ const app = websockify(new Koa());
 app.proxy = true;
 yapi.app = app;
 
-// app.use(bodyParser({multipart: true}));
-app.use(koaBody({strict: false, multipart: true, jsonLimit: '2mb', formLimit: '1mb', textLimit: '1mb' }));
+app.use(
+  koaBody({
+    // Mock APIs accept a body with any method, as YApi did.
+    parsedMethods: ['POST', 'PUT', 'PATCH', 'DELETE', 'GET', 'HEAD'],
+    multipart: true,
+    jsonLimit: '2mb',
+    formLimit: '1mb',
+    textLimit: '1mb'
+  })
+);
 app.use(mockServer);
 app.use(router.routes());
 app.use(router.allowedMethods());

@@ -1,5 +1,5 @@
-import test from 'ava';
-import mergeJsonSchema from '../../common/mergeJsonSchema';
+const test = require('../ava-compat');
+const mergeJsonSchema = require('../../common/mergeJsonSchema');
 
 test('base', t=>{
   let schema1 = {

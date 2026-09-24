@@ -1,4 +1,4 @@
-import test from 'ava';
+const test = require('./ava-compat');
 const mockExtra = require('../common/mock-extra.js');
 
 

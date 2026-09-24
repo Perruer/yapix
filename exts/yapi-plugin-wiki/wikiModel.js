@@ -33,7 +33,7 @@ class statisMockModel extends baseModel {
   }
 
   up(id, data) {
-    return this.model.update(
+    return this.model.updateOne(
       {
         _id: id
       },
@@ -43,7 +43,7 @@ class statisMockModel extends baseModel {
   }
 
   upEditUid(id, uid) {
-    return this.model.update(
+    return this.model.updateOne(
       {
         _id: id
       },

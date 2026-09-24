@@ -44,7 +44,7 @@ class stroageModel extends baseModel {
   }
 
   del(key) {
-    return this.model.remove({
+    return this.model.deleteMany({
       key
     });
   }
