@@ -12,7 +12,6 @@ import Loading from './components/Loading/Loading';
 import MyPopConfirm from './components/MyPopConfirm/MyPopConfirm';
 import { checkLoginState } from './reducer/modules/user';
 import { requireAuthentication } from './components/AuthenticatedComponent';
-import Notify from './components/Notify/Notify';
 
 const plugin = require('client/plugin.js');
 
@@ -112,7 +111,6 @@ export default class App extends Component {
         <Router getUserConfirmation={this.showConfirm}>
           <div className="g-main">
             <div className="router-main">
-              {this.props.curUserRole === 'admin' && <Notify />}
               {alertContent()}
               {this.props.loginState !== 1 ? <Header /> : null}
               <div className="router-container">

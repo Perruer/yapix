@@ -205,8 +205,7 @@ async function sandboxByNode(context, script) {
     if (context[key] !== undefined) data[key] = context[key];
   }
   const storageItems = context.storage && context.storage.getAll ? context.storage.getAll() : {};
-  const result = await runScript(`const context = globalThis;
-${script}`, {
+  const result = await runScript(`const context = globalThis;\n${script}`, {
     data,
     outputKeys: SCRIPT_KEYS,
     utils: true,

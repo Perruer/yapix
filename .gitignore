@@ -44,3 +44,7 @@ tsconfig.json
 client/plugin-module.js
 .vscode
 /iconfont
+
+# built by webpack
+/static/prd/
+/static/index.html

@@ -19,7 +19,6 @@ const { koaBody } = require('koa-body');
 const router = require('./router.js');
 
 global.storageCreator = storageCreator;
-let indexFile = process.argv[2] === 'dev' ? 'dev.html' : 'index.html';
 
 const app = websockify(new Koa());
 app.proxy = true;
@@ -50,19 +49,19 @@ app.use(async (ctx, next) => {
   }
 });
 
+// Built files carry a content hash in their names and can be cached for good; koa-static serves the
+// precompressed .gz copies itself.
+const HASHED_ASSET = /^\/prd\/[^/]+\.[0-9a-f]{8}\.[a-z0-9]+$/;
 app.use(async (ctx, next) => {
-  if (ctx.path.indexOf('/prd') === 0) {
-    ctx.set('Cache-Control', 'max-age=8640000000');
-    if (yapi.commons.fileExist(yapi.path.join(yapi.WEBROOT, 'static', ctx.path + '.gz'))) {
-      ctx.set('Content-Encoding', 'gzip');
-      ctx.path = ctx.path + '.gz';
-    }
-  }
   await next();
+  if (HASHED_ASSET.test(ctx.path)) {
+    ctx.set('Cache-Control', 'public, max-age=31536000, immutable');
+  } else if (ctx.path === '/' || ctx.path === '/index.html') {
+    ctx.set('Cache-Control', 'no-cache');
+  }
 });
 
-
-app.use(koaStatic(yapi.path.join(yapi.WEBROOT, 'static'), { index: indexFile, gzip: true }));
+app.use(koaStatic(yapi.path.join(yapi.WEBROOT, 'static'), { index: 'index.html', gzip: true }));
 
 
 // Listen once the database is up and the token secret is loaded.

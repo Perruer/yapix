@@ -158,7 +158,7 @@ class exportController extends baseController {
           <div id="right" class="content-right">
           ${tp}
             <footer class="m-footer">
-              <p>Build by <a href="https://ymfe.org/">YMFE</a>.</p>
+              <p>Built with <a href="https://github.com/Perruer/yapix">Yapix</a>, based on YApi by <a href="https://github.com/YMFE/yapi">YMFE</a>.</p>
             </footer>
           </div>
         </div>
