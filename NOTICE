@@ -1,0 +1,11 @@
+Yapix
+Copyright 2026 Perruer (Yapix modifications)
+
+This product is a continuation of YApi (https://github.com/YMFE/yapi),
+Copyright 2017, The YMFE Team, licensed under the Apache License, Version 2.0.
+
+Yapix changes YApi's server dependencies, script sandbox, security defaults and
+client build, and adds a browser extension (extension/). The history of the
+changes is in the Git log and in CHANGELOG.md.
+
+Yapix is not affiliated with or endorsed by YMFE or Qunar.

@@ -1,3 +1,44 @@
+## Yapix 2.0.0 (unreleased)
+
+The first release of Yapix, a maintained continuation of YApi 1.12. It runs on existing YApi databases; read [UPGRADING.md](UPGRADING.md) before upgrading.
+
+### Security
+
+* Mock scripts, test-case assertions and server-side pre- and post-request scripts run in a separate V8 isolate (isolated-vm) with a 64 MB heap, 3 s of CPU time and a 10 s deadline, instead of vm2/safeify and node:vm.
+* Project tokens: without `passsalt`, YApi encrypted them with the public key `abcde`, so a project member could forge a token for another user. Yapix keeps a random secret in the database and refuses tokens made with the public key; `"legacyTokens": true` accepts them during a migration.
+* `/api/project/token` and `/api/project/update_token` check project access; `update_token` no longer issues a token for the uid `undefined`.
+* The first admin gets `YAPIX_ADMIN_PASSWORD` or a random password instead of `ymfe.org`.
+* Passwords are stored as scrypt hashes; YApi's SHA-1 hashes are replaced at the next sign-in.
+* API parameters with MongoDB query operators are refused.
+* LDAP sign-in escapes the user name in the search filter and refuses empty passwords.
+* Server-side test requests check TLS certificates (CVE-2025-70058); `"insecureTLS": true` turns the check off.
+* The diff view uses jsondiffpatch 0.7.6 (XSS in the HTML formatter).
+* Mock.js templates can no longer write into `Object.prototype` through a `__proto__` key.
+* `config_example.json` closes registration.
+* Production dependencies: 244 known advisories (50 critical) in YApi 1.12, one mitigated in Yapix.
+
+### Platform
+
+* Node.js 24, Mongoose 9 (MongoDB 4.4–8), Koa 3, @koa/router, koa-body 8, Ajv 8, jsonwebtoken 9, nodemailer, axios 1, ldapts. `request`, `vm2` and `safeify` are gone.
+* Project tokens work on Node.js 22 and later (YApi used the removed `crypto.createCipher`); tokens issued with a configured `passsalt` stay valid.
+* The client is built with webpack 5, Babel 7, less 4 and dart-sass instead of ykit and node-sass; antd 3.26, React 16.14, recharts 2.
+* `YAPIX_CONFIG` can point at `config.json`.
+* `server/install.js` keeps an existing admin, so it can run against a YApi database.
+
+### Browser extension
+
+* Yapix Request Helper (Manifest V3, in `extension/`) replaces cross-request for the Run tab and browser test runs. It provides the same `window.crossRequest` function and works only on sites allowed in its popup. `/api/interface/download_crx` serves it.
+
+### Docker and CI
+
+* Official image `ghcr.io/perruer/yapix` for amd64 and arm64, configured with `YAPIX_*` variables; `docker-compose.yml` with MongoDB 8.
+* CI runs unit tests, an end-to-end API test, the extension in Chromium, an upgrade from a database filled by YApi 1.12 and a Docker smoke test.
+
+### Removed
+
+* The admin banner that fetched a version list from a third-party mock service on every page load.
+* The prebuilt client in `static/prd` (built by `npm run build-client`) and the cross-request zip.
+
 ## [1.10.2](https://github.com/YMFE/yapi/compare/v1.10.1...v1.10.2) (2021-10-13)
 
 ### Bug Fixes
