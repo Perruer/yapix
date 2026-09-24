@@ -196,7 +196,7 @@ class userController extends baseController {
         await this.handlePrivateGroup(user._id, username, email);
         yapi.commons.sendMail({
           to: email,
-          contents: `<h3>亲爱的用户：</h3><p>您好，感谢使用YApi平台，你的邮箱账号是：${email}</p>`
+          contents: `<h3>亲爱的用户：</h3><p>您好，感谢使用 Yapix 平台，你的邮箱账号是：${email}</p>`
         });
       }
 
@@ -357,7 +357,7 @@ class userController extends baseController {
       });
       yapi.commons.sendMail({
         to: user.email,
-        contents: `<h3>亲爱的用户：</h3><p>您好，感谢使用YApi可视化接口平台,您的账号 ${
+        contents: `<h3>亲爱的用户：</h3><p>您好，感谢使用 Yapix 可视化接口平台,您的账号 ${
           params.email
         } 已经注册成功</p>`
       });

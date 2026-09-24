@@ -69,18 +69,18 @@ Footer.defaultProps = {
       iconType: 'github',
       linkList: [
         {
-          itemTitle: 'YApi 源码仓库',
-          itemLink: 'https://github.com/YMFE/yapi'
+          itemTitle: 'Yapix 源码仓库',
+          itemLink: 'https://github.com/Perruer/yapix'
         }
       ]
     },
     {
-      title: '团队',
+      title: '致谢',
       iconType: 'team',
       linkList: [
         {
-          itemTitle: 'YMFE',
-          itemLink: 'https://ymfe.org'
+          itemTitle: '基于 YMFE 的 YApi',
+          itemLink: 'https://github.com/YMFE/yapi'
         }
       ]
     },
@@ -90,24 +90,24 @@ Footer.defaultProps = {
       linkList: [
         {
           itemTitle: 'Github Issues',
-          itemLink: 'https://github.com/YMFE/yapi/issues'
+          itemLink: 'https://github.com/Perruer/yapix/issues'
         },
         {
           itemTitle: 'Github Pull Requests',
-          itemLink: 'https://github.com/YMFE/yapi/pulls'
+          itemLink: 'https://github.com/Perruer/yapix/pulls'
         }
       ]
     },
     {
-      title: `Copyright © 2018-${new Date().getFullYear()} YMFE`,
+      title: `© 2018-2022 YMFE · ${new Date().getFullYear()} Yapix`,
       linkList: [
         {
           itemTitle: `版本: ${version} `,
-          itemLink: 'https://github.com/YMFE/yapi/blob/master/CHANGELOG.md'
+          itemLink: 'https://github.com/Perruer/yapix/blob/main/CHANGELOG.md'
         },
         {
           itemTitle: '使用文档',
-          itemLink: 'https://hellosean1025.github.io/yapi/'
+          itemLink: 'https://github.com/Perruer/yapix/tree/main/docs/documents'
         }
       ]
     }

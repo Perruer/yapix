@@ -34,7 +34,7 @@ class Content extends Component {
   };
   constructor(props) {
     super(props);
-    this.title = 'YApi-高效、易用、功能强大的可视化接口管理平台';
+    this.title = 'Yapix - 高效、易用、功能强大的可视化接口管理平台';
     this.state = {
       curtab: 'view',
       visible: false,

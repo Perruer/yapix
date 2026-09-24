@@ -180,7 +180,7 @@ exports.expireDate = day => {
 
 exports.sendMail = (options, cb) => {
   if (!yapi.mail) return false;
-  options.subject = options.subject ? options.subject + '-YApi 平台' : 'YApi 平台';
+  options.subject = options.subject ? options.subject + '-Yapix 平台' : 'Yapix 平台';
 
   cb =
     cb ||

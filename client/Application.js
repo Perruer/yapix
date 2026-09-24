@@ -25,7 +25,7 @@ const alertContent = () => {
     return (
       <Alert
         style={{ zIndex: 99 }}
-        message={'YApi 的接口测试等功能仅支持 Chrome 浏览器，请使用 Chrome 浏览器获得完整功能。'}
+        message={'Yapix 的接口测试等功能需要 Chrome、Edge 或 Firefox 浏览器，请使用这些浏览器获得完整功能。'}
         banner
         closable
       />

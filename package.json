@@ -1,7 +1,7 @@
 {
-  "name": "yapi-vendor",
-  "version": "1.11.0",
-  "description": "YAPI",
+  "name": "yapix",
+  "version": "2.0.0-dev",
+  "description": "Yapix: API management, mock server and API testing platform. Maintained continuation of YApi.",
   "main": "server/app.js",
   "scripts": {
     "dev-copy-icon": "cp -r static/iconfont ./",
@@ -12,9 +12,7 @@
     "start": " node server/app.js",
     "test": "ava",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
-    "build-client": "NODE_ENV=production ykit pack -m",
-    "npm-publish": "node ./npm-publish.js",
-    "docs": "ydoc build"
+    "build-client": "NODE_ENV=production ykit pack -m"
   },
   "scripts-info": {
     "start": "运行生产环境服务器",
@@ -26,9 +24,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:YMFE/yapi.git"
+    "url": "https://github.com/Perruer/yapix.git"
   },
-  "author": "",
+  "author": "Perruer and YApi contributors",
   "license": "Apache-2.0",
   "dependencies": {
     "ajv": "^5.5.1",
@@ -84,8 +82,7 @@
     "tslib": "1.8.0",
     "underscore": "1.8.3",
     "url": "0.11.0",
-    "vm2": "^3.8.4",
-    "yapi-plugin-qsso": "^1.1.0"
+    "vm2": "^3.8.4"
   },
   "devDependencies": {
     "antd": "3.2.2",
@@ -215,5 +212,9 @@
       "babel-register"
     ],
     "babel": "inherit"
+  },
+  "homepage": "https://github.com/Perruer/yapix#readme",
+  "bugs": {
+    "url": "https://github.com/Perruer/yapix/issues"
   }
 }

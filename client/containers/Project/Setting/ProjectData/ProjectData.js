@@ -325,7 +325,7 @@ class ProjectData extends Component {
                   <a
                     target="_blank"
                     rel="noopener noreferrer"
-                    href="https://hellosean1025.github.io/yapi/documents/data.html"
+                    href="https://github.com/Perruer/yapix/blob/main/docs/documents/data.md"
                   >
                     <Tooltip title="点击查看文档">
                       <Icon type="question-circle-o" />

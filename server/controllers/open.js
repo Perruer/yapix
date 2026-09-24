@@ -284,7 +284,7 @@ class openController extends baseController {
         ctx.request.origin
       }/api/open/run_auto_test?id=${id}&token=${token}&mode=${ctx.params.mode}`;
       yapi.commons.sendNotice(projectId, {
-        title: `YApi自动化测试报告`,
+        title: `Yapix 自动化测试报告`,
         content: `
         <html>
         <head>

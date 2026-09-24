@@ -698,7 +698,7 @@ class InterfaceColContent extends Component {
                       {' '}
                       每个用例都有唯一的key，用于获取所匹配接口的响应数据，例如使用{' '}
                       <a
-                        href="https://hellosean1025.github.io/yapi/documents/case.html#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%8C%E7%BC%96%E8%BE%91%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B"
+                        href="https://github.com/Perruer/yapix/blob/main/docs/documents/case.md#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%8C%E7%BC%96%E8%BE%91%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B"
                         className="link-tooltip"
                         target="blank"
                       >
@@ -1017,7 +1017,7 @@ class InterfaceColContent extends Component {
               测试集合&nbsp;<a
                 target="_blank"
                 rel="noopener noreferrer"
-                href="https://hellosean1025.github.io/yapi/documents/case.html"
+                href="https://github.com/Perruer/yapix/blob/main/docs/documents/case.md"
               >
                 <Tooltip title="点击查看文档">
                   <Icon type="question-circle-o" />
@@ -1043,7 +1043,7 @@ class InterfaceColContent extends Component {
                 }}
               >
                 {this.props.curProjectRole !== 'guest' && (
-                  <Tooltip title="在 YApi 服务端跑自动化测试，测试环境不能为私有网络，请确保 YApi 服务器可以访问到自动化测试环境domain">
+                  <Tooltip title="在 Yapix 服务端跑自动化测试，测试环境不能为私有网络，请确保 YApi 服务器可以访问到自动化测试环境domain">
                     <Button
                       style={{
                         marginRight: '8px'
@@ -1245,7 +1245,7 @@ class InterfaceColContent extends Component {
               </Col>
             </Row>
             <div className="autoTestMsg">
-              注：访问该URL，可以测试所有用例，请确保YApi服务器可以访问到环境配置的 domain
+              注：访问该URL，可以测试所有用例，请确保 Yapix 服务器可以访问到环境配置的 domain
             </div>
           </Modal>
         )}
