@@ -29,10 +29,14 @@ function install() {
   setupSql();
 }
 
-function setupSql() {
+// An existing YApi or Yapix database keeps its users: the admin is created only when that e-mail is new.
+async function createAdmin() {
   let userInst = yapi.getInst(userModel);
+  if (await userInst.findByEmail(yapi.WEBCONFIG.adminAccount)) {
+    return false;
+  }
   let passsalt = yapi.commons.randStr();
-  let result = userInst.save({
+  await userInst.save({
     username: yapi.WEBCONFIG.adminAccount.substr(0, yapi.WEBCONFIG.adminAccount.indexOf('@')),
     email: yapi.WEBCONFIG.adminAccount,
     password: yapi.commons.generatePassword(adminPassword, passsalt),
@@ -41,7 +45,10 @@ function setupSql() {
     add_time: yapi.commons.time(),
     up_time: yapi.commons.time()
   });
+  return true;
+}
 
+function setupSql() {
   yapi.connect
     .then(function() {
       let userCol = mongoose.connection.db.collection('user');
@@ -143,10 +150,12 @@ function setupSql() {
         project_id: 1
       });
 
-      result.then(
-        function() {
+      createAdmin().then(
+        function(created) {
           fs.ensureFileSync(yapi.path.join(yapi.WEBROOT_RUNTIME, 'init.lock'));
-          if (process.env.YAPIX_ADMIN_PASSWORD) {
+          if (!created) {
+            console.log(`Admin account "${yapi.WEBCONFIG.adminAccount}" already exists; the database was kept as it is.`); // eslint-disable-line
+          } else if (process.env.YAPIX_ADMIN_PASSWORD) {
             console.log(`初始化管理员账号成功,账号名："${yapi.WEBCONFIG.adminAccount}"，密码: YAPIX_ADMIN_PASSWORD`); // eslint-disable-line
           } else {
             console.log(`初始化管理员账号成功,账号名："${yapi.WEBCONFIG.adminAccount}"，密码："${adminPassword}"`); // eslint-disable-line

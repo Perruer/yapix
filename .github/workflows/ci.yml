@@ -1,0 +1,143 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Tests, e2e and the browser extension
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      mongo:
+        image: mongo:8
+        ports: ['27017:27017']
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build-client
+      - name: Start Yapix
+        run: |
+          mkdir -p "$RUNNER_TEMP/run"
+          cat > "$RUNNER_TEMP/run/config.json" <<'EOF'
+          { "port": "3000", "adminAccount": "admin@admin.com",
+            "db": { "servername": "127.0.0.1", "port": 27017, "DATABASE": "yapix_ci" },
+            "mail": { "enable": false } }
+          EOF
+          export YAPIX_CONFIG="$RUNNER_TEMP/run/config.json"
+          YAPIX_ADMIN_PASSWORD=ci-admin-pass node server/install.js
+          nohup node server/app.js > "$RUNNER_TEMP/run/server.log" 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:3000/api/user/status > /dev/null && break; sleep 1; done
+      - name: End-to-end API test
+        run: ADMIN_PASSWORD=ci-admin-pass node test/e2e/api-flow.mjs http://127.0.0.1:3000
+      - name: Browser extension test
+        run: |
+          npx playwright-core install --with-deps chromium
+          export CHROME_PATH="$(node -e "console.log(require('playwright-core').chromium.executablePath())")"
+          ADMIN_PASSWORD=ci-admin-pass node test/e2e/extension.mjs http://127.0.0.1:3000
+      - name: Server log
+        if: failure()
+        run: cat "$RUNNER_TEMP/run/server.log"
+
+  upgrade:
+    name: Upgrade from a YApi 1.12 database
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      mongo:
+        image: mongo:8
+        ports: ['27017:27017']
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - name: Install and start YApi 1.12 (Node 20)
+        run: |
+          # 59bade3a is the last YMFE commit (YApi 1.12.0), with its prebuilt client and package-lock.json
+          mkdir -p "$RUNNER_TEMP/yapi/vendors"
+          git archive 59bade3a | tar -x -C "$RUNNER_TEMP/yapi/vendors"
+          cd "$RUNNER_TEMP/yapi"
+          cat > config.json <<'EOF'
+          { "port": "3201", "adminAccount": "admin@admin.com",
+            "db": { "servername": "127.0.0.1", "port": 27017, "DATABASE": "upgrade" },
+            "mail": { "enable": false } }
+          EOF
+          cd vendors
+          python3 "$GITHUB_WORKSPACE/test/e2e/fix-lock-mirrors.py" package-lock.json
+          npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+          node server/install.js
+          nohup node server/app.js > ../yapi.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://127.0.0.1:3201/api/user/status > /dev/null && break; sleep 1; done
+      - name: Fill the database with YApi
+        run: ADMIN_PASSWORD=ymfe.org node test/e2e/upgrade.mjs seed http://127.0.0.1:3201 "$RUNNER_TEMP/state.json"
+      - name: Stop YApi
+        run: pkill -f "node server/app.js"
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Check the data with Yapix
+        run: |
+          mkdir -p "$RUNNER_TEMP/run"
+          cat > "$RUNNER_TEMP/run/config.json" <<'EOF'
+          { "port": "3000", "adminAccount": "admin@admin.com",
+            "db": { "servername": "127.0.0.1", "port": 27017, "DATABASE": "upgrade" },
+            "mail": { "enable": false } }
+          EOF
+          export YAPIX_CONFIG="$RUNNER_TEMP/run/config.json"
+          node server/install.js
+          nohup node server/app.js > "$RUNNER_TEMP/run/server.log" 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:3000/api/user/status > /dev/null && break; sleep 1; done
+          ADMIN_PASSWORD=ymfe.org node test/e2e/upgrade.mjs check http://127.0.0.1:3000 "$RUNNER_TEMP/state.json"
+      - name: Check again with legacyTokens
+        run: |
+          pkill -f "node server/app.js" || true
+          export YAPIX_CONFIG="$RUNNER_TEMP/run/config.json"
+          node -e "const f=process.env.YAPIX_CONFIG,c=require(f);c.legacyTokens=true;require('fs').writeFileSync(f,JSON.stringify(c))"
+          nohup node server/app.js > "$RUNNER_TEMP/run/server-legacy.log" 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:3000/api/user/status > /dev/null && break; sleep 1; done
+          LEGACY_TOKENS=1 ADMIN_PASSWORD=ymfe.org node test/e2e/upgrade.mjs check http://127.0.0.1:3000 "$RUNNER_TEMP/state.json"
+      - name: Logs
+        if: failure()
+        run: cat "$RUNNER_TEMP/yapi/yapi.log" "$RUNNER_TEMP"/run/*.log || true
+
+  docker:
+    name: Docker image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - run: docker build -t yapix:ci .
+      - name: Run the image with MongoDB
+        run: |
+          docker network create yapix
+          docker run -d --name mongo --network yapix mongo:8
+          docker run -d --name yapix --network yapix -p 3000:3000 \
+            -e YAPIX_MONGO_URL=mongodb://mongo:27017/yapi \
+            -e YAPIX_ADMIN_PASSWORD=ci-admin-pass \
+            -e YAPIX_CLOSE_REGISTER=false \
+            yapix:ci
+          for i in $(seq 1 60); do curl -sf http://127.0.0.1:3000/api/user/status > /dev/null && break; sleep 2; done
+          curl -sf http://127.0.0.1:3000/ | grep -q '<div id=yapi'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: End-to-end API test against the container
+        run: ADMIN_PASSWORD=ci-admin-pass node test/e2e/api-flow.mjs http://127.0.0.1:3000
+      - name: Container log
+        if: failure()
+        run: docker logs yapix

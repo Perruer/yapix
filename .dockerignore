@@ -1,0 +1,7 @@
+node_modules
+.git
+static/prd
+static/index.html
+static/attachment/yapix-request-helper.zip
+client/plugin-module.js
+*.log

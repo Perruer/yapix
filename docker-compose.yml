@@ -1,0 +1,28 @@
+# Yapix with MongoDB. Start with:  YAPIX_ADMIN_PASSWORD=<a long password> docker compose up -d
+# Then open http://localhost:3000 and sign in as admin@admin.com.
+services:
+  yapix:
+    image: ghcr.io/perruer/yapix:latest
+    # build: .
+    ports:
+      - '3000:3000'
+    environment:
+      YAPIX_MONGO_URL: mongodb://mongo:27017/yapi
+      YAPIX_ADMIN_EMAIL: admin@admin.com
+      YAPIX_ADMIN_PASSWORD: ${YAPIX_ADMIN_PASSWORD:?set YAPIX_ADMIN_PASSWORD}
+      YAPIX_CLOSE_REGISTER: 'true'
+    volumes:
+      - yapix-data:/data
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:8
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+
+volumes:
+  yapix-data:
+  mongo-data:
