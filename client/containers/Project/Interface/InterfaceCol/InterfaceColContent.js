@@ -1043,7 +1043,7 @@ class InterfaceColContent extends Component {
                 }}
               >
                 {this.props.curProjectRole !== 'guest' && (
-                  <Tooltip title="在 Yapix 服务端跑自动化测试，测试环境不能为私有网络，请确保 YApi 服务器可以访问到自动化测试环境domain">
+                  <Tooltip title="在 Yapix 服务端跑自动化测试，测试环境不能为私有网络，请确保 Yapix 服务器可以访问到自动化测试环境domain">
                     <Button
                       style={{
                         marginRight: '8px'
