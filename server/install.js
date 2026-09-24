@@ -4,6 +4,15 @@ const commons = require('./utils/commons');
 const dbModule = require('./utils/db.js');
 const userModel = require('./models/user.js');
 const mongoose = require('mongoose');
+const crypto = require('crypto');
+
+// YApi created every admin with the password "ymfe.org". Yapix takes it from YAPIX_ADMIN_PASSWORD
+// or generates one and prints it once.
+const adminPassword = process.env.YAPIX_ADMIN_PASSWORD || crypto.randomBytes(12).toString('base64url');
+if (adminPassword.length < 8) {
+  console.error('YAPIX_ADMIN_PASSWORD must be at least 8 characters'); // eslint-disable-line
+  process.exit(1);
+}
 
 yapi.commons = commons;
 yapi.connect = dbModule.connect();
@@ -26,7 +35,7 @@ function setupSql() {
   let result = userInst.save({
     username: yapi.WEBCONFIG.adminAccount.substr(0, yapi.WEBCONFIG.adminAccount.indexOf('@')),
     email: yapi.WEBCONFIG.adminAccount,
-    password: yapi.commons.generatePassword('ymfe.org', passsalt),
+    password: yapi.commons.generatePassword(adminPassword, passsalt),
     passsalt: passsalt,
     role: 'admin',
     add_time: yapi.commons.time(),
@@ -137,9 +146,12 @@ function setupSql() {
       result.then(
         function() {
           fs.ensureFileSync(yapi.path.join(yapi.WEBROOT_RUNTIME, 'init.lock'));
-          console.log(
-            `初始化管理员账号成功,账号名："${yapi.WEBCONFIG.adminAccount}"，密码："ymfe.org"`
-          ); // eslint-disable-line
+          if (process.env.YAPIX_ADMIN_PASSWORD) {
+            console.log(`初始化管理员账号成功,账号名："${yapi.WEBCONFIG.adminAccount}"，密码: YAPIX_ADMIN_PASSWORD`); // eslint-disable-line
+          } else {
+            console.log(`初始化管理员账号成功,账号名："${yapi.WEBCONFIG.adminAccount}"，密码："${adminPassword}"`); // eslint-disable-line
+            console.log('Admin account created. This password is shown only once; change it after the first login.'); // eslint-disable-line
+          }
           process.exit(0);
         },
         function(err) {

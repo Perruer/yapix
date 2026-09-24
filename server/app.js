@@ -65,12 +65,20 @@ app.use(async (ctx, next) => {
 app.use(koaStatic(yapi.path.join(yapi.WEBROOT, 'static'), { index: indexFile, gzip: true }));
 
 
-const server = app.listen(yapi.WEBCONFIG.port);
-
-server.setTimeout(yapi.WEBCONFIG.timeout);
-
-commons.log(
-  `服务已启动，请打开下面链接访问: \nhttp://127.0.0.1${
-    yapi.WEBCONFIG.port == '80' ? '' : ':' + yapi.WEBCONFIG.port
-  }/`
-);
+// Listen once the database is up and the token secret is loaded.
+yapi.connect
+  .then(() => require('./utils/token').init())
+  .then(() => {
+    const server = app.listen(yapi.WEBCONFIG.port);
+    server.setTimeout(yapi.WEBCONFIG.timeout);
+    commons.log(
+      `服务已启动，请打开下面链接访问: 
+http://127.0.0.1${
+        yapi.WEBCONFIG.port == '80' ? '' : ':' + yapi.WEBCONFIG.port
+      }/`
+    );
+  })
+  .catch(err => {
+    commons.log(err, 'error');
+    process.exit(1);
+  });

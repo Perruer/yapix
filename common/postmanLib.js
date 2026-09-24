@@ -52,6 +52,21 @@ const getStorage = async (id)=>{
   }
 }
 
+// Server-side test runs check TLS certificates (YApi turned the check off, CVE-2025-70058).
+// For test servers with self-signed certificates, add the CA with NODE_EXTRA_CA_CERTS, or set
+// "insecureTLS": true in config.json to skip the check.
+let httpsAgent;
+function getHttpsAgent() {
+  if (!httpsAgent) {
+    let insecure = false;
+    try {
+      insecure = require('../server/yapi').WEBCONFIG.insecureTLS === true;
+    } catch (err) {} // eslint-disable-line no-empty
+    httpsAgent = new https.Agent({ rejectUnauthorized: !insecure });
+  }
+  return httpsAgent;
+}
+
 async function httpRequestByNode(options) {
   function handleRes(response) {
     if (!response || typeof response !== 'object') {
@@ -107,9 +122,7 @@ async function httpRequestByNode(options) {
       headers: options.headers,
       timeout: 10000,
       maxRedirects: 0,
-      httpsAgent: new https.Agent({
-        rejectUnauthorized: false
-      }),
+      httpsAgent: getHttpsAgent(),
       data: options.data
     });
     return handleRes(response);

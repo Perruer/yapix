@@ -1000,6 +1000,9 @@ class projectController extends baseController {
   async token(ctx) {
     try {
       let project_id = ctx.params.project_id;
+      if ((await this.checkAuth(project_id, 'project', 'view')) !== true) {
+        return (ctx.body = yapi.commons.resReturn(null, 405, '没有权限'));
+      }
       let data = await this.tokenModel.get(project_id);
       let token;
       if (!data) {
@@ -1035,6 +1038,9 @@ class projectController extends baseController {
   async updateToken(ctx) {
     try {
       let project_id = ctx.params.project_id;
+      if ((await this.checkAuth(project_id, 'project', 'edit')) !== true) {
+        return (ctx.body = yapi.commons.resReturn(null, 405, '没有权限'));
+      }
       let data = await this.tokenModel.get(project_id);
       let token, result;
       if (data && data.token) {
@@ -1044,7 +1050,7 @@ class projectController extends baseController {
           .digest('hex')
           .substr(0, 20);
         result = await this.tokenModel.up(project_id, token);
-        token = getToken(token);
+        token = getToken(token, this.getUid());
         result.token = token;
       } else {
         ctx.body = yapi.commons.resReturn(null, 402, '没有查到token信息');

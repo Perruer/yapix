@@ -29,27 +29,66 @@ function aesDecode(data, password) {
   return decipher.update(data, 'hex', 'utf8') + decipher.final('utf8');
 }
 
-const defaultSalt = 'abcde';
+// YApi encrypted tokens with config.passsalt and fell back to the public constant 'abcde'. With a public
+// key anyone holding a token can decrypt it and build one for another user id, so Yapix keeps a random
+// secret in the database when config.json sets no passsalt. Tokens made with 'abcde' are accepted only
+// when config.json sets "legacyTokens": true (for a migration period), and then with a warning.
+const LEGACY_SALT = 'abcde';
+let secret = null;
+
+exports.init = async function init() {
+  if (yapi.WEBCONFIG.passsalt) {
+    secret = yapi.WEBCONFIG.passsalt;
+    return;
+  }
+  const mongoose = require('mongoose');
+  const settings = mongoose.connection.db.collection('yapix_settings');
+  await settings.updateOne(
+    { _id: 'token_secret' },
+    { $setOnInsert: { value: crypto.randomBytes(32).toString('hex') } },
+    { upsert: true }
+  );
+  secret = (await settings.findOne({ _id: 'token_secret' })).value;
+};
+
+function currentSecret() {
+  if (!secret) throw new Error('token secret is not loaded yet');
+  return secret;
+}
+
+function decode(token, key) {
+  let text;
+  try {
+    text = aesDecode(token, key);
+  } catch (e) {
+    return null;
+  }
+  if (typeof text !== 'string' || text.indexOf('|') <= 0) return null;
+  const parts = text.split('|');
+  return { uid: parts[0], projectToken: parts[1] };
+}
 
 exports.getToken = function getToken(token, uid) {
   if (!token) throw new Error('token 不能为空');
-  yapi.WEBCONFIG.passsalt = yapi.WEBCONFIG.passsalt || defaultSalt;
-  return aesEncode(uid + '|' + token, yapi.WEBCONFIG.passsalt);
+  return aesEncode(uid + '|' + token, currentSecret());
 };
 
+/**
+ * @returns {{uid: string, projectToken: string, legacy?: boolean} | false | {legacyRejected: true}}
+ */
 exports.parseToken = function parseToken(token) {
   if (!token) throw new Error('token 不能为空');
-  yapi.WEBCONFIG.passsalt = yapi.WEBCONFIG.passsalt || defaultSalt;
-  let tokens;
-  try {
-    tokens = aesDecode(token, yapi.WEBCONFIG.passsalt);
-  } catch (e) {} // eslint-disable-line no-empty
-  if (tokens && typeof tokens === 'string' && tokens.indexOf('|') > 0) {
-    tokens = tokens.split('|');
-    return {
-      uid: tokens[0],
-      projectToken: tokens[1]
-    };
+  const parsed = decode(token, currentSecret());
+  if (parsed) return parsed;
+  if (!yapi.WEBCONFIG.passsalt && secret !== LEGACY_SALT) {
+    const legacy = decode(token, LEGACY_SALT);
+    if (legacy) {
+      if (yapi.WEBCONFIG.legacyTokens === true) {
+        yapi.commons.log('A token made by YApi with its public default key was used; get a new token in the project settings.', 'warn');
+        return Object.assign(legacy, { legacy: true });
+      }
+      return { legacyRejected: true };
+    }
   }
   return false;
 };

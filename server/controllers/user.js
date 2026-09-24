@@ -45,7 +45,10 @@ class userController extends baseController {
 
     if (!result) {
       return (ctx.body = yapi.commons.resReturn(null, 404, '该用户不存在'));
-    } else if (yapi.commons.generatePassword(password, result.passsalt) === result.password) {
+    } else if (yapi.commons.verifyPassword(password, result.passsalt, result.password)) {
+      if (yapi.commons.isLegacyPassword(result.password)) {
+        await userInst.update(result._id, { password: yapi.commons.generatePassword(password, result.passsalt) });
+      }
       this.setLoginCookie(result._id, result.passsalt);
 
       return (ctx.body = yapi.commons.resReturn(
@@ -241,7 +244,7 @@ class userController extends baseController {
         return (ctx.body = yapi.commons.resReturn(null, 400, '旧密码不能为空'));
       }
 
-      if (yapi.commons.generatePassword(params.old_password, user.passsalt) !== user.password) {
+      if (!yapi.commons.verifyPassword(params.old_password, user.passsalt, user.password)) {
         return (ctx.body = yapi.commons.resReturn(null, 402, '旧密码错误'));
       }
     }

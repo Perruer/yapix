@@ -102,10 +102,21 @@ async function verify() {
   r = await user.get(`/api/col/case_list?col_id=${s.colId}`);
   check('old test case is there', ok(r) && r.data.some(c => c._id === s.caseId), r);
 
+  // YApi encrypted tokens with a public default key unless config.json set passsalt. Yapix rejects
+  // those tokens unless the server sets "legacyTokens": true (run with LEGACY_TOKENS=1 then).
   r = await new Client().get(`/api/interface/list_menu?token=${s.token}&project_id=${s.projectId}`);
-  check('token issued by YApi still works', ok(r) && JSON.stringify(r.data).includes('old interface'), r);
+  if (process.env.LEGACY_TOKENS === '1') {
+    check('with legacyTokens, a token issued by YApi still works', ok(r) && JSON.stringify(r.data).includes('old interface'), r);
+  } else {
+    check('a token issued by YApi with the public key is refused', r.errcode === 42014 && /new token/.test(r.errmsg), r);
+  }
   r = await user.get(`/api/project/token?project_id=${s.projectId}`);
-  check('the project token is unchanged', ok(r) && r.data === s.token, r);
+  check('a new token is issued', ok(r) && typeof r.data === 'string' && r.data !== s.token, r);
+  const newToken = r.data;
+  r = await new Client().get(`/api/interface/list_menu?token=${newToken}&project_id=${s.projectId}`);
+  check('the new token works', ok(r) && JSON.stringify(r.data).includes('old interface'), r);
+  r = await new Client().get(`/api/project/token?project_id=${s.projectId}`);
+  check('a token is not handed out without signing in', !ok(r), r);
 
   r = await new Client().request('GET', `/mock/${s.projectId}${s.basepath}/things/5`, undefined, { raw: true });
   check('old interface is mocked', r.status === 200 && JSON.parse(r.text).kind === 'old', r.text.slice(0, 200));

@@ -24,6 +24,8 @@ async function main() {
   let r = await admin.post('/api/user/login', { email: adminEmail, password: adminPassword });
   check('admin login', ok(r), r);
   check('wrong password is rejected', !ok(await new Client().post('/api/user/login', { email: adminEmail, password: adminPassword + 'x' })));
+  r = await new Client().post('/api/user/login', { email: { $ne: null }, password: { $ne: null } });
+  check('query operators in parameters are refused', r.errcode === 400, r);
   r = await admin.get('/api/user/status');
   check('status shows the admin', ok(r) && r.data.role === 'admin', r);
 

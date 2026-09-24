@@ -67,6 +67,15 @@ class baseController {
 
       let tokenUid = oldTokenUid;
 
+      if (tokens && tokens.legacyRejected) {
+        this.$tokenError = yapi.commons.resReturn(
+          null,
+          42014,
+          'token 无效: this token was made by YApi with a public key. Get a new token in the project settings.'
+        );
+        return;
+      }
+
       if(!tokens){
         let checkId = await this.getProjectIdByToken(token);
         if(!checkId)return;
@@ -86,7 +95,8 @@ class baseController {
 
       let checkId = await this.getProjectIdByToken(token);
       if(!checkId){
-        ctx.body = yapi.commons.resReturn(null, 42014, 'token 无效');
+        this.$tokenError = yapi.commons.resReturn(null, 42014, 'token 无效');
+        return;
       }
       let projectData = await this.projectModel.get(checkId);
       if (projectData) {

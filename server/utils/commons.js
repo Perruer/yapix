@@ -2,6 +2,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const yapi = require('../yapi.js');
 const sha1 = require('sha1');
+const crypto = require('crypto');
 const logModel = require('../models/log.js');
 const projectModel = require('../models/project.js');
 const interfaceColModel = require('../models/interfaceCol.js');
@@ -168,9 +169,29 @@ exports.getIp = ctx => {
   return ip;
 };
 
+// Password hashes. YApi stored sha1(password + sha1(salt)); Yapix stores scrypt hashes and replaces
+// an old hash with a new one on the next successful login.
+const SCRYPT_PREFIX = 'scrypt$';
+
 exports.generatePassword = (password, passsalt) => {
-  return sha1(password + sha1(passsalt));
+  return SCRYPT_PREFIX + crypto.scryptSync(String(password), String(passsalt), 32).toString('hex');
 };
+
+function sameText(a, b) {
+  const x = Buffer.from(String(a));
+  const y = Buffer.from(String(b));
+  return x.length === y.length && crypto.timingSafeEqual(x, y);
+}
+
+exports.verifyPassword = (password, passsalt, stored) => {
+  if (typeof stored !== 'string' || typeof password !== 'string') return false;
+  if (stored.indexOf(SCRYPT_PREFIX) === 0) {
+    return sameText(exports.generatePassword(password, passsalt), stored);
+  }
+  return sameText(sha1(password + sha1(passsalt)), stored);
+};
+
+exports.isLegacyPassword = stored => typeof stored === 'string' && stored.indexOf(SCRYPT_PREFIX) !== 0;
 
 exports.expireDate = day => {
   let date = new Date();
@@ -411,8 +432,27 @@ exports.saveLog = logData => {
  * @param {*} action controller action_name
  * @param {*} ws enable ws
  */
+// Request values reach MongoDB filters in many places. An object such as {"$ne": null} in place of a
+// string would turn a lookup into a query operator, so such values are refused.
+const QUERY_OPERATOR = /^\$(where|expr|function|accumulator|ne|eq|gt|gte|lt|lte|in|nin|regex|options|exists|type|not|nor|or|and|all|elemMatch|size|mod|text|jsonSchema|comment)$/;
+function findQueryOperator(value, depth = 0) {
+  if (!value || typeof value !== 'object' || depth > 20) return null;
+  for (const key of Object.keys(value)) {
+    if (QUERY_OPERATOR.test(key)) return key;
+    const found = findQueryOperator(value[key], depth + 1);
+    if (found) return found;
+  }
+  return null;
+}
+exports.findQueryOperator = findQueryOperator;
+
 exports.createAction = (router, baseurl, routerController, action, path, method, ws) => {
   router[method](baseurl + path, async ctx => {
+    const operator = findQueryOperator(ctx.request.query) || findQueryOperator(ctx.request.body);
+    if (operator) {
+      ctx.body = yapi.commons.resReturn(null, 400, `请求参数不能包含 ${operator}`);
+      return;
+    }
     let inst = new routerController(ctx);
     try {
       await inst.init(ctx);
@@ -431,7 +471,7 @@ exports.createAction = (router, baseurl, routerController, action, path, method,
         if (ws === true) {
           ctx.ws.send('请登录...');
         } else {
-          ctx.body = yapi.commons.resReturn(null, 40011, '请登录...');
+          ctx.body = inst.$tokenError || yapi.commons.resReturn(null, 40011, '请登录...');
         }
       }
     } catch (err) {
