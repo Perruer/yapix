@@ -3,6 +3,7 @@
 // Env: ADMIN_EMAIL (default admin@admin.com), ADMIN_PASSWORD (required).
 // The server must allow registration (closeRegister: false) so a second user can be created.
 /* eslint-disable no-console */
+import { setup } from './lib.mjs';
 
 const base = (process.argv[2] || 'http://127.0.0.1:3000').replace(/\/$/, '');
 const adminEmail = process.env.ADMIN_EMAIL || 'admin@admin.com';
@@ -12,59 +13,7 @@ if (!adminPassword) {
   process.exit(2);
 }
 
-let failed = 0;
-let passed = 0;
-function check(name, ok, detail) {
-  if (ok) {
-    passed++;
-    console.log(`ok   ${name}`);
-  } else {
-    failed++;
-    console.log(`FAIL ${name}${detail === undefined ? '' : ': ' + JSON.stringify(detail).slice(0, 400)}`);
-  }
-  return ok;
-}
-
-// A tiny HTTP client with its own cookie jar, one per signed-in user
-class Client {
-  constructor() {
-    this.cookies = new Map();
-  }
-  async request(method, path, body, { raw = false, headers = {} } = {}) {
-    const opts = { method, headers: { ...headers }, redirect: 'manual' };
-    if (this.cookies.size) opts.headers.cookie = [...this.cookies].map(([k, v]) => `${k}=${v}`).join('; ');
-    if (body !== undefined) {
-      if (typeof body === 'string') opts.body = body;
-      else {
-        opts.body = JSON.stringify(body);
-        opts.headers['content-type'] = 'application/json';
-      }
-    }
-    const res = await fetch(base + path, opts);
-    for (const line of res.headers.getSetCookie()) {
-      const [pair] = line.split(';');
-      const i = pair.indexOf('=');
-      this.cookies.set(pair.slice(0, i).trim(), pair.slice(i + 1).trim());
-    }
-    const text = await res.text();
-    if (raw) return { status: res.status, text, headers: res.headers };
-    let json;
-    try {
-      json = JSON.parse(text);
-    } catch {
-      json = { errcode: -1, errmsg: 'not json', text: text.slice(0, 200) };
-    }
-    return json;
-  }
-  get(path, opts) {
-    return this.request('GET', path, undefined, opts);
-  }
-  post(path, body, opts) {
-    return this.request('POST', path, body, opts);
-  }
-}
-
-const ok = r => r && r.errcode === 0;
+const { check, ok, Client, summary } = setup(base);
 const stamp = Date.now().toString(36);
 
 async function main() {
@@ -189,11 +138,5 @@ main()
       await more(ctx, { check, ok, base, Client });
     }
   })
-  .catch(err => {
-    failed++;
-    console.log('FAIL unexpected error:', err && err.stack);
-  })
-  .finally(() => {
-    console.log(`\n${passed} passed, ${failed} failed`);
-    process.exit(failed ? 1 : 0);
-  });
+  .catch(err => check('no unexpected error', false, err && err.stack))
+  .finally(summary);
