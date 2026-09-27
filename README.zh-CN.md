@@ -75,6 +75,8 @@ npm start
 
 备份 MongoDB，停止 YApi，然后在同一个数据库上启动 Yapix。请先阅读 [UPGRADING.md](UPGRADING.md)（英文）：其中说明了 MongoDB 版本要求、需要更换的项目 token、脚本限制和新扩展。
 
+旧的项目 token 会失效：Yapix 拒绝 YApi 用公开密钥生成的 token，easy-yapi 等客户端会显示原因。如需在发放新 token 期间继续使用旧 token，请在 `config.json` 中设置 `"legacyTokens": true`；每次使用都会记录一条警告日志。
+
 ## 文档
 
 - [使用手册](docs/documents/index.md)（来自 YApi）

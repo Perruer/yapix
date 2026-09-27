@@ -75,6 +75,8 @@ To send requests from the Run tab and run test collections in the browser, insta
 
 Back up MongoDB, stop YApi and start Yapix on the same database. Read [UPGRADING.md](UPGRADING.md) first: it covers MongoDB versions, project tokens that need replacing, script limits and the new extension.
 
+Old project tokens stop working: Yapix refuses tokens YApi made with its public key, and clients such as easy-yapi show the reason. To keep them working while you hand out new ones, set `"legacyTokens": true` in `config.json`; every use is logged with a warning.
+
 ## Documentation
 
 - [User guide (Chinese)](docs/documents/index.md), from YApi
